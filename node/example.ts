@@ -1,5 +1,4 @@
 import axios from "axios";
-axios.defaults.adapter = "http"; // Allows nock to intercept axios requests
 
 async function relayMessageToRelevantPeople(message: string) {
   if (message.match("CONFIDENTIAL")) {
@@ -27,9 +26,9 @@ async function relayMessageToRelevantChannel(
 }
 
 // Tests
-
 import assert from "assert";
 import nock from "nock"; // Http & DNS mocking framework
+axios.defaults.adapter = "http"; // Allows nock to intercept axios requests
 
 describe("relayMessageToRelevantPeople", function () {
   it("redirect confidential messages only to vip(s)", async function () {
