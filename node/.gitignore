@@ -1,0 +1,4 @@
+# NodeJS dependencies
+node_modules
+# TS output directory
+out
