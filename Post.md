@@ -135,7 +135,7 @@ The choice of the messaging protocol (http) and the knowledge of the addresses h
 - In the same style, if we want to reuse the same logic of message discrimination with another framework or protocol, we would have to duplicate the function.
 - To be able to test the behaviour we actually care about (redirecting the message based on its content), the test setup becomes quite involved:
 
-```ts source=node/example.ts lines=30-47
+```ts source=node/example.ts lines=29-46
 import nock from "nock"; // Http & DNS mocking framework
 axios.defaults.adapter = "http"; // Allows nock to intercept axios requests
 
@@ -162,7 +162,7 @@ We have to setup an entire http interception mechanism, and even a pretty simple
 
 We could have abstracted and injected the vip and everyone communication channels:
 
-```ts source=node/example.ts lines=11-26
+```ts source=node/example.ts lines=11-25
 interface Channel {
   // type of an async function accepting a string and returning void
   (message: string): Promise<void>;
@@ -170,20 +170,19 @@ interface Channel {
 
 async function relayMessageToRelevantChannel(
   message: string,
-  channels: {Channel, Channel],
+  channels: { sendVip: Channel; sendEveryone: Channel },
 ) {
-  const [sendVip, sendEveryone] = channels; // destructure channels
   if (message.match("CONFIDENTIAL")) {
-    await sendVip(message);
+    await channels.sendVip(message);
   } else {
-    await sendEveryone(message);
+    await channels.sendEveryone(message);
   }
 }
 ```
 
 the test does not require the http setup anymore :
 
-```ts source=node/example.ts lines=49-77
+```ts source=node/example.ts lines=48-76
 describe("relayMessageToRelevantPeople with channel injection", function () {
   it("redirect confidential messages only to vip(s)", async function () {
     // Setup our mocks without needing http
@@ -191,12 +190,12 @@ describe("relayMessageToRelevantPeople with channel injection", function () {
     const vipChannel = async (_: string) => {
       vipCalled = true;
     }; // A mock only updating our flag when called
-    const everyoneChannel = async (_: string) => {}; // A mock doiing nothing
+    const everyoneChannel = async (_: string) => {}; // A mock doing nothing
 
-    await relayMessageToRelevantChannel("this is CONFIDENTIAL", [
-      vipChannel,
-      everyoneChannel,
-    ]);
+    await relayMessageToRelevantChannel("this is CONFIDENTIAL", {
+      sendVip: vipChannel,
+      sendEveryone: everyoneChannel,
+    });
     assert.equal(vipCalled, true);
   });
 
@@ -206,10 +205,10 @@ describe("relayMessageToRelevantPeople with channel injection", function () {
       everyoneCalled = true;
     };
     const vipChannel = async (msg: string) => {};
-    await relayMessageToRelevantChannel("this is CONFITURE", [
-      vipChannel,
-      everyoneChannel,
-    ]);
+    await relayMessageToRelevantChannel("this is CONFITURE", {
+      sendVip: vipChannel,
+      sendEveryone: everyoneChannel,
+    });
     assert.equal(everyoneCalled, true);
   });
 });

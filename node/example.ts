@@ -15,13 +15,12 @@ interface Channel {
 
 async function relayMessageToRelevantChannel(
   message: string,
-  channels: [Channel, Channel],
+  channels: { sendVip: Channel; sendEveryone: Channel },
 ) {
-  const [sendVip, sendEveryone] = channels; // destructure channels
   if (message.match("CONFIDENTIAL")) {
-    await sendVip(message);
+    await channels.sendVip(message);
   } else {
-    await sendEveryone(message);
+    await channels.sendEveryone(message);
   }
 }
 
@@ -53,12 +52,12 @@ describe("relayMessageToRelevantPeople with channel injection", function () {
     const vipChannel = async (_: string) => {
       vipCalled = true;
     }; // A mock only updating our flag when called
-    const everyoneChannel = async (_: string) => {}; // A mock doiing nothing
+    const everyoneChannel = async (_: string) => {}; // A mock doing nothing
 
-    await relayMessageToRelevantChannel("this is CONFIDENTIAL", [
-      vipChannel,
-      everyoneChannel,
-    ]);
+    await relayMessageToRelevantChannel("this is CONFIDENTIAL", {
+      sendVip: vipChannel,
+      sendEveryone: everyoneChannel,
+    });
     assert.equal(vipCalled, true);
   });
 
@@ -68,10 +67,10 @@ describe("relayMessageToRelevantPeople with channel injection", function () {
       everyoneCalled = true;
     };
     const vipChannel = async (msg: string) => {};
-    await relayMessageToRelevantChannel("this is CONFITURE", [
-      vipChannel,
-      everyoneChannel,
-    ]);
+    await relayMessageToRelevantChannel("this is CONFITURE", {
+      sendVip: vipChannel,
+      sendEveryone: everyoneChannel,
+    });
     assert.equal(everyoneCalled, true);
   });
 });
