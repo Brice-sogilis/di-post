@@ -1,4 +1,5 @@
 example-tests:
+	$(MAKE) -C c tests
 	$(MAKE) -C java tests
 	$(MAKE) -C node tests
 	$(MAKE) -C zig tests
