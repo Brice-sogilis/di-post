@@ -44,3 +44,35 @@ test "Detecting a memory leak" {
     // if we do not actually free the list, the test would fail, helping us detecting memory leaks at test time without additionnal tools
     list.deinit();
 }
+
+fn sumOddNumbers(numbers: []const u32) u32 {
+    var res: u32 = 0;
+    for (numbers) |n| {
+        if (n % 2 == 1) res += n;
+    }
+    return res;
+}
+
+fn sumOddNumbersInTwoPhases(allocator: std.mem.Allocator, numbers: []const u32) !u32 {
+    var oddNumbers = std.ArrayList(u32).init(allocator);
+    defer oddNumbers.deinit();
+
+    // First select odd numbers
+    for (numbers) |n| {
+        if (n % 2 == 1) try oddNumbers.append(n);
+    }
+
+    // Then sum them
+    var res: u32 = 0;
+    for (oddNumbers.items) |n| {
+        res += n;
+    }
+
+    return res;
+}
+
+test "sumOddNumbers" {
+    const numbers = [_]u32{ 1, 2, 3, 4, 5, 6, 7, 8, 9 };
+    try std.testing.expect(sumOddNumbers(&numbers) == 25);
+    try std.testing.expect(try sumOddNumbersInTwoPhases(std.testing.allocator, &numbers) == 25);
+}
