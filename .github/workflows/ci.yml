@@ -1,0 +1,36 @@
+name: CI
+
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+
+
+    - name: Use Java 21
+      uses: actions/setup-java@v3
+      with:
+        java-version: '21'
+        distribution: 'temurin'
+        architecture: x64
+
+    - name: Use NodeJS 16.x
+      uses: actions/setup-node@v3
+      with:
+        node-version: '16.x'
+
+    - name: Use Zig 0.11.0
+      run: |
+        wget https://ziglang.org/download/0.11.0/zig-linux-x86_64-0.11.0.tar.xz
+        tar -xf zig-linux-x86_64-0.11.0.tar.xz
+
+    - name: Run tests
+      run: |
+        make ci-setup
+        make example-tests ZIG=${{ github.workspace }}/zig-linux-x86_64-0.11.0/zig
