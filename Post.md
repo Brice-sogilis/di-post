@@ -2,9 +2,9 @@
 
 ## Context
 
-While looking at [Zig](https://ziglang.org/) I found the memory allocation idioms encouraged by the language illustrative of the Dependency Injection pattern advantages. I tried to write some examples, and ended up writing more of non-zig examples
+While looking at [Zig](https://ziglang.org/) I found the memory allocation idioms encouraged by the language illustrative of the Dependency Injection pattern advantages. This post focuses on some benefits of dependency injection, illustrating each of them with a 'bonus' Zig example.
 
-I hope the document remains consistent and usefull !
+The source code backing this post can be found at https://github.com/Brice-sogilis/di-post/tree/main
 
 ## Terminology
 
@@ -28,8 +28,6 @@ We will focus on three main ‘features’ of dependency injection :
 + Capacity & requirements tracking
 
 ## 1) Critical resource control
-
-### The concept
 
 Without dependency injection, each component is responsible to allocate it’s own resources at will. These can be threads, memory, shared files, a database connection… With time and complexification of the system, the number and the degree of nesting of these components and sub-modules is likely to grow, and this "help yourself" behaviour can lead to conflicts or starvation in other parts of the system. Consider the following Java code allocating threads to parallelize some computations:
 
@@ -113,7 +111,7 @@ fn caesarCiphered(allocator: std.mem.Allocator, offset: u8, clearText: []const u
 
 As the caller is now controlling the allocation, it can raise an error if the function is trying to allocate more memory than expected. In case of an allocation error, the caller control the error raised by the allocator and the potential recovery strategies to apply, freeing the function from this responsibility.
 
-## 2) Modularity => Testability
+## 2) Testability
 
 Another benefit of dependency injection is that it eases the unit testing of a component. Consider the following NodeJS function where we want to dispatch a message to different address according to the message content:
 
