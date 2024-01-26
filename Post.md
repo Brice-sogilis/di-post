@@ -10,8 +10,8 @@ The source code backing this post can be found at https://github.com/Brice-sogil
 
 ### Dependency Injection
 
-- In this document, we **do** use the terms Dependency injection for what is also called the Inversion of Control pattern, or the Strategy Pattern. It designates the design principle of passing behaviour implementations or resources to a system components instead of letting each component implement their own, to leave each component responsible only of its specific domain, and to centralize transversal resources management.
-- We **do not** use the term Dependency injection to designate the dependencies injection frameworks such as Spring or Guice, whose role is to ease the ‘mechanical’ part of actually applying this pattern in a codebase, for example by automating some parameter injection with annotations.
+- In this document, we **do** use the terms Dependency Injection for what is also called the Inversion of Control pattern, or the Strategy Pattern. It designates the design principle of passing behaviour implementations or resources to a system components instead of letting each component implement their own. Each component is then responsible for its specific domain, and resources management can be centralized.
+- We **do not** use the term Dependency Injection to designate the dependencies injection frameworks such as Spring or Guice, whose role is to ease the ‘mechanical’ part of actually applying this pattern in a codebase, for example by automating some parameter injection with annotations.
 
 ### Memory allocation
 
@@ -51,7 +51,7 @@ class Compute {
 }
 ```
 
-This works fine when you instanciate only one `Compute` instance at the root of the application, but it could quickly become a source of overhead if many instances were to be used, even more if, for example, each thread allocates a lot of memory which cannot be garbage collected until the computation is done. Plus, we had not to forget to shutdown the threadpool after the computation. In this “help yourself” approach, managing resources allocation, would have to be done by each classes requiring the resource, mixing their real responsibility with such housekeeping, error prone tasks.
+This works fine when you instanciate only one `Compute` instance at the root of the application, but it could quickly become a source of overhead if many instances were to be used, even more if, for example, each thread allocates a lot of memory which cannot be garbage collected until the computation is done. Plus, we had not to forget to shutdown the threadpool after the computation. In this “help yourself” approach, managing resources allocation, would have to be done by each class requiring the resource, mixing its real responsibility with such housekeeping, error prone tasks.
 
 Switching to this :
 
@@ -91,7 +91,7 @@ const  char * caesarCiphered(unsigned char offset, const  char * clearText, unsi
 }
 ```
 
-In case of an allocation error, e rely on the function to adopt an appropriate behaviour to crash or recover.
+In case of an allocation error, e relies on the function to adopt an appropriate behaviour to crash or recover.
 
 In Zig the idiom is to inject the allocator:
 
@@ -109,11 +109,11 @@ fn caesarCiphered(allocator: std.mem.Allocator, offset: u8, clearText: []const u
 }
 ```
 
-As the caller is now controlling the allocation, it can raise an error if the function is trying to allocate more memory than expected. In case of an allocation error, the caller control the error raised by the allocator and the potential recovery strategies to apply, freeing the function from this responsibility.
+As the caller is now controlling the allocation, it can raise an error if the function is trying to allocate more memory than expected. In case of an allocation error, the caller controls the error raised by the allocator and the potential recovery strategies to apply, freeing the function from this responsibility.
 
 ## 2) Testability
 
-Another benefit of dependency injection is that it eases the unit testing of a component. Consider the following NodeJS function where we want to dispatch a message to different address according to the message content:
+Another benefit of dependency injection is that it eases the unit testing of a component. Let's consider the following NodeJS function where we want to dispatch a message to distinct addresses according to the message content:
 
 ```ts source=node/example.ts lines=1-9
 import axios from "axios";
@@ -127,9 +127,9 @@ async function relayMessageToRelevantPeople(message: string) {
 }
 ```
 
-The choice of the messaging protocol (http) and the knowledge of the addresses have to be decided or known by the function. This bring some complications, among which :
+The choice of the messaging protocol (http) and the knowledge of the addresses have to be decided or known by the function. This brings some complications, among which :
 
-- If we want to switch to another message relay mechanism, such as an event bus protocol, we would have to update all the functions adopting the same model as `relayMessageToRelevantPeople`
+- If we want to switch to another message relay mechanism, such as an event bus protocol, we would have to update all the functions adopting the same model as `relayMessageToRelevantPeople`.
 - In the same style, if we want to reuse the same logic of message discrimination with another framework or protocol, we would have to duplicate the function.
 - To be able to test the behaviour we actually care about (redirecting the message based on its content), the test setup becomes quite involved:
 
@@ -178,7 +178,7 @@ async function relayMessageToRelevantChannel(
 }
 ```
 
-the test does not require the http setup anymore :
+the test does not require the http setup anymore:
 
 ```ts source=node/example.ts lines=48-76
 describe("relayMessageToRelevantPeople with channel injection", function () {
@@ -214,7 +214,7 @@ describe("relayMessageToRelevantPeople with channel injection", function () {
 
 ### Zig example
 
-Memory leaks prevention and detection motivated the development of many Memory Analysis tools such as AddressSanitizer or Valgrind. These external tools represent an additional effort when integrating into the CI process, especially when you want to scan many individual components, an are external to the language, requiring expertise. Despite not being enough to catch all kinds of memory leaks, Zig **builtin** `std.testing.allocator`takes advantage of the dependency injection to catch a whole range of memory leaks bugs whith minimal overhead when writing your tests:
+Memory leaks prevention and detection motivated the development of many Memory Analysis tools such as AddressSanitizer or Valgrind. These external tools represent an additional effort when integrating into the CI process, especially when you want to scan many individual components, that are external to the language and require expertise. Despite not being enough to catch all kinds of memory leaks, Zig **builtin** `std.testing.allocator` takes advantage of the dependency injection to catch a whole range of memory leaks bugs whith minimal overhead when writing your tests:
 
 ```zig source=zig/example.zig lines=26-46
 test "This would pass" {
@@ -242,7 +242,7 @@ test "Detecting a memory leak" {
 
 ## 3) Capacity & requirements tracking
 
-This point is simple but underrated: when ensuring that every resource or external behaviour is injected instead of creating them at will, the signature of the functions/methods/classes/… reveals their needs, and possibly some design flows :
+This point is simple but underrated: when ensuring that every resource or external behaviour is injected instead of creating them at will, the signature of the functions/methods/classes/… reveals their needs, and possibly some design flows:
 
 ```python
 # Making http in the middle of an arithmetic operation ? Never!
@@ -261,7 +261,7 @@ fun splitPolygonInSegments(polygon: Polygon, debugDir: Path?): List<Segment> {
 
 ### Zig example
 
-Allocating memory can sometime be avoided. When forced to explicitly pass allocators when needed, you are more likely to think about a more efficient or simple solution :
+Allocating memory can sometime be avoided. When forced to explicitly pass allocators when needed, you are more likely to think about a more efficient or simple solution:
 
 ```zig source=zig/example.zig lines=48-72
 fn sumOddNumbers(numbers: []const u32) u32 {
