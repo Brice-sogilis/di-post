@@ -10,7 +10,7 @@ The source code backing this post can be found at https://github.com/Brice-sogil
 
 ### Dependency Injection
 
-- In this document, we **do** use the terms Dependency Injection for what is also called the Inversion of Control pattern, or the Strategy Pattern. It designates the design principle of passing behaviour implementations or resources to a system components instead of letting each component implement their own. Each component is then responsible for its specific domain, and resources management can be centralized.
+- In this document, we use the terms Dependency Injection for a kind of application of what is also called the Strategy Pattern. It designates the principle of passing behaviour implementations or resources to a system components instead of letting each component implement or acquire them by their own. Each component is then responsible for its specific domain, and resources management can be centralized.
 - We **do not** use the term Dependency Injection to designate the dependencies injection frameworks such as Spring or Guice, whose role is to ease the ‘mechanical’ part of actually applying this pattern in a codebase, for example by automating some parameter injection with annotations.
 
 ### Memory allocation
