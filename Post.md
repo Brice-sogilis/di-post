@@ -19,7 +19,7 @@ In some languages, memory management is automated, either by a [garbage collecto
 
 ## Benefits of dependency injection
 
-We will focus on three main ‘features’ of dependency injection :
+We will focus on three main ‘features’ implemented with dependency injection :
 
 + Critical resource control
 
@@ -129,8 +129,7 @@ async function relayMessageToRelevantPeople(message: string) {
 
 The choice of the messaging protocol (http) and the knowledge of the addresses have to be decided or known by the function. This brings some complications, among which :
 
-- If we want to switch to another message relay mechanism, such as an event bus protocol, we would have to update all the functions adopting the same model as `relayMessageToRelevantPeople`.
-- In the same style, if we want to reuse the same logic of message discrimination with another framework or protocol, we would have to duplicate the function.
+
 - To be able to test the behaviour we actually care about (redirecting the message based on its content), the test setup becomes quite involved:
 
 ```ts source=node/example.ts lines=29-46
@@ -157,6 +156,8 @@ describe("relayMessageToRelevantPeople", function () {
 *Sidenote : nock can actually be a pretty usefull tool* (*[documentation here](https://www.npmjs.com/package/nock#axios)*)
 
 We have to setup an entire http interception mechanism, and even a pretty simple test becomes noisy because of the surrounding network mechanics.
+
+If we were to switch to another message relay mechanism, such as an event bus protocol, we would have to update the tests and find another mocking framework.
 
 We could have abstracted and injected the vip and everyone communication channels:
 
