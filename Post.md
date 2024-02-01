@@ -243,19 +243,28 @@ test "Detecting a memory leak" {
 
 ## 3) Capacity & requirements tracking
 
-This point is simple but underrated: when ensuring that every resource or external behaviour is injected instead of creating them at will, the signature of the functions/methods/classes/… reveals their needs, and possibly some design flows:
-
-```python
-# Making http in the middle of an arithmetic operation ? Never!
-def add(a: int, b: int, server: HttpServer) -> int:
-	...
-```
+This point is simple but underrated: when ensuring that every resource or external behaviour is injected instead of creating them at will, the signature of the functions/methods/classes/… reveals their needs, and possibly some design flows. For example, requiring I/O parameters such as a file system or databse access, inside 'pure logic' functions:
 
 ```kotlin
-// Writing debug files in the middle of a geometric operation ? ... Never ?
+// Writing debug files in the middle of a geometric operation ?
+
+// Implicitely
+fun splitPolygonInSegments(polygon: Polygon): List<Segment> {
+	// ...    
+	plotSegment(s, "/debug/segment_image.png")
+	// ...
+}
+
+// Explicitely
 fun splitPolygonInSegments(polygon: Polygon, debugDir: Path?): List<Segment> {
 	// ...    
 	plotSegment(s, debugDir / "segment_image.png")
+	// ...
+}
+
+// And maybe the debug output part should be done elsewhere
+fun onlySplitPolygonInSegments(polygon: Polygon): List<Segment> {
+	// ...    
 	// ...
 }
 ```
