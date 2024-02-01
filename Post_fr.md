@@ -1,7 +1,7 @@
-# 3 avantages de l'injection de dépendance, illustrés avec le cas de l'allocation mémoire dans le language Zig
+# 3 avantages de l'injection de dépendances, illustrés avec le cas de l'allocation mémoire dans le language Zig
 
 ## Contexte
-En s'intéressant au language [Zig](https://ziglang.org/), j'ai trouvé que ses conventions concernant l'allocation émmoire étaient une bonne illustration de certains avantages du pattern d'injection de dépendances. Cet article ce concentre sur certains de ces avantages, en illustrant chacun d'eux avec un exemple 'bonus' en Zig en plus de languages plus classiques.
+En s'intéressant au language [Zig](https://ziglang.org/), j'ai trouvé que ses conventions concernant l'allocation mémoire étaient une bonne illustration de certains avantages du pattern d'injection de dépendances. Cet article ce concentre sur certains de ces avantages, en illustrant chacun d'eux avec un exemple 'bonus' en Zig en plus de languages plus classiques.
 
 Le code source correspondant à l'article est disponible sur Github à l'addresse https://github.com/Brice-sogilis/di-post/tree/main
 
@@ -9,18 +9,18 @@ Le code source correspondant à l'article est disponible sur Github à l'address
 
 ### Injection de dépendance
 
-- Dans ce document, on utilise le terme Injection de Dépendance pour un cas d'application spécifique du pattern "Straégie". On désigne par Injection de dépendance le principe de fournir des implémentations spécifiques de comportements ou des ressources à un composant(classe, fonction, module ...) d'un système au lieu de laisser chaque composant instancier ou acquérir ces ressources par lui même. On restreint ainsi le champs des responsabilités de chaque composant à son domaine spécifique, et la gestion des ressources peut être centralisée ou modularisée.
-- On n'utilise **pas** le terme d'iInjection de Dépendance pour désigner les framework associés, comme Sring ou Guice, dont le rôle est de faciliter la gestion "mécanique" de l'application de ce pattern dans une base de code, par exemple en automatisant l'injection de paramètre à l'aide d'annotations. 
+- Dans ce document, on utilise le terme Injection de Dépendance pour un cas d'application spécifique du pattern "Stratégie". On désigne par Injection de dépendance le principe de fournir des implémentations spécifiques de comportements ou des ressources à un composant(classe, fonction, module ...) d'un système au lieu de laisser chaque composant instancier ou acquérir ces ressources par lui même. On restreint ainsi le champs des responsabilités de chaque composant à son domaine spécifique, et la gestion des ressources peut être centralisée ou modularisée.
+- On n'utilise **pas** le terme d'injection de Dépendance pour désigner les framework associés, comme Sring ou Guice, dont le rôle est de faciliter la gestion "mécanique" de l'application de ce pattern dans une base de code, par exemple en automatisant l'injection de paramètre à l'aide d'annotations. 
 
 
 ### Allocation mémoire
 
-Dans certains language la gestion de la mémoire est automatisée, que ce soit par un [garbage collector](https://en.wikipedia.org/wiki/Garbage_collection_(computer_science))(Java, C#, Javascript, OCaml…) ou par du code généré par le compilateur (C++ [destructors](https://www.geeksforgeeks.org/destructors-c/), [Rust](https://www.rust-lang.org/) …).
-Dans d'autre, particulièrement le [C](https://en.wikipedia.org/wiki/C_dynamic_memory_allocation), allouer et librérer la mémoire relève de la responsabilité du programmeur. Des objets ou structures de données créés dynamiquement (i.e. de manière non-bornée à la compilation) doivent être explicitement libérées par des fonctions dédiées, ce qui implique de respecter certaines conventions de "propriétés" de ces données afin de s'assurer que de la mémoire allouée ne fuitera pas en n'étant jamais libérée ("memory-leak") ou bien, à l'inverse, que plusieurs zones du code n'essayeront pas de nettoyer plusieurs fois la même zone mémoire ("double-free").
+Dans certains languages la gestion de la mémoire est automatisée, que ce soit par un [garbage collector](https://en.wikipedia.org/wiki/Garbage_collection_(computer_science))(Java, C#, Javascript, OCaml…) ou par du code généré par le compilateur (C++ [destructors](https://www.geeksforgeeks.org/destructors-c/), [Rust](https://www.rust-lang.org/) …).
+Dans d'autre, particulièrement le [C](https://en.wikipedia.org/wiki/C_dynamic_memory_allocation), allouer et libérer la mémoire relève de la responsabilité du programmeur. Des objets ou structures de données créés dynamiquement (i.e. de manière non-bornée à la compilation) doivent être explicitement libérés par des fonctions dédiées, ce qui implique de respecter certaines conventions de "propriétés" sur ces données afin de s'assurer que de la mémoire allouée ne fuitera pas en n'étant jamais libérée ("memory-leak") ou bien, à l'inverse, que plusieurs zones du code n'essayeront pas de nettoyer plusieurs fois la même zone mémoire ("double-free").
 
 ## Avantages de l'injection de dépendances
 
-Nous allons traiter de trois principales 'features' implémentée avec l'injection de dépendances: 
+Nous allons traiter de trois principales 'features' implémentées avec l'injection de dépendances: 
 
 + Le contrôle de ressources critiques
 
@@ -30,7 +30,7 @@ Nous allons traiter de trois principales 'features' implémentée avec l'injecti
 
 ## 1) Contrôle de ressources critiques
 
-Sans injection de dépendances, chaque composant est responsable d'allouer ses propres ressources à la volée. Ces ressources peuvent être des threads, de la mémoire, des fichiers partagés, une connection à une base de données... Avec le temps, le système se complexifiant, le nombre et l'intrication de ces composants va croître, et cette approche où "chacun se sert à volonté" peut mener à des conflits ou a des situation de famine dans d'autres parties du système. Considérons le code Java suivant, qui alloue plusieurs threads pour paralléliser un calcul:
+Sans injection de dépendances, chaque composant est responsable d'allouer ses propres ressources à la volée. Ces ressources peuvent être des threads, de la mémoire, des fichiers partagés, une connection à une base de données... Avec le temps, le système se complexifiant, le nombre et l'intrication de ces composants vont croître, et cette approche où "chacun se sert à volonté" peut mener à des conflits ou a des situation de famine dans d'autres parties du système. Considérons le code Java suivant, qui alloue plusieurs threads pour paralléliser un calcul:
 
 
 ```java source=java/Example.java lines=6-22
@@ -53,7 +53,7 @@ class Compute {
 }
 ```
 
-Cela fonctionne sans soucis quand on génère seulement une ou quelques instances de `Compute` à la racine de l'application, mais celà peut rapidement devenir une source de surcharge si un grand nombre d'instances sont utilisées, dépassant le nombre de thread que la machine peut effectivement faire tourner en parallèle, et d'autant plus si on considère que chacun des threads requiert un grande quantité de mémoire, qui ne pourra pas être libérée avant la complétion du calcul. De plus, en tant que programmeur de ce code on doit s'assurer de fermer le `threadPool` à la fin du calcul. Dans cette approche, chaque classe qui utilise des threads doit effectuer la même gestion de fermeture, mélangeant ses responsabilités métier avec ces tâches 'd'intendance', propices aux erreurs ou oublis.   
+Cela fonctionne sans soucis quand on génère seulement une ou quelques instances de `Compute` à la racine de l'application, mais cela peut rapidement devenir une source de surcharge si un grand nombre d'instances sont utilisées, dépassant le nombre de thread que la machine peut effectivement faire tourner en parallèle, et d'autant plus si on considère que chacun des threads requiert un grande quantité de mémoire, qui ne pourra pas être libérée avant la complétion du calcul. De plus, en tant que programmeur de ce code on doit s'assurer de fermer le `threadPool` à la fin du calcul. Dans cette approche, chaque classe qui utilise des threads doit effectuer la même gestion de fermeture, mélangeant ses responsabilités métier avec ces tâches 'd'intendance', propices aux erreurs ou oublis.   
 
 En modifiant le code ainsi :
 
@@ -72,12 +72,12 @@ class ComputeWithInjectedResource {
 }
 ```
 
-La responsabilité d'allouer les threads appartient maintenant à l'appelant de la méthode run, qui peut limiter le nombre de threads disponibles, gérer une file de priorité, etc.
+La responsabilité d'allouer les threads appartient maintenant à l'appelant de la méthode `run`, qui peut limiter le nombre de threads disponibles, gérer une file de priorité, etc.
 De plus, on n'a plus besoin de gérer la logique de fermeture du threadPool, qui peut être centralisée dans un composant dédiée, limitant le risque d'erreur.
 
 ### Exemple Zig
 
-En C, l'allocation mémoire peut être effectuée depuis n'importe quelle zone du code, en utilisant la fonction standard `malloc`. Une fonction "gourmande" peut allouer plus de mémoire qu'on ne le souhaiterait, forçant chaque composant à être responsable d'allouer et librérer la mémoire requise à son fonctionnement et de gérer es erreurs potentielles. Par exemple, une implémentation du chiffrage de césar:
+En C, l'allocation mémoire peut être effectuée depuis n'importe quelle zone du code, en utilisant la fonction standard `malloc`. Une fonction "gourmande" peut allouer plus de mémoire qu'on ne le souhaiterait, forçant chaque composant à être responsable d'allouer et libérer la mémoire requise à son fonctionnement et de gérer les erreurs potentielles. Par exemple, voici une implémentation possible du [chiffrage de césar](https://fr.wikipedia.org/wiki/Chiffrement_par_d%C3%A9calage):
 
 ```c source=c/example.c lines=5-14
 const  char * caesarCiphered(unsigned char offset, const  char * clearText, unsigned  int textLength) {
@@ -128,7 +128,7 @@ async function relayMessageToRelevantPeople(message: string) {
 }
 ```
 
-Le choix du protocole (http) et la connaissance des urls sont inclus dans la fonction. Celà amène des complications pour la tester: pour tester ce dont on ce préoccupe, la logique de discrimination du message, le setup de test devient ardu:
+Le choix du protocole (http) et la connaissance des urls sont inclus dans la fonction. Celà amène des complications lors de la mise au point du test unitaire: pour tester ce dont on ce préoccupe, la logique de discrimination du message, le setup devient ardu:
 
 
 ```ts source=node/example.ts lines=29-46
@@ -154,7 +154,7 @@ describe("relayMessageToRelevantPeople", function () {
 
 *[la documentation de nock](https://www.npmjs.com/package/nock#axios)*
 
-Il faut mettre en place un mécanisme d'interception http, et même ce test relativement simple est bruité par les éléments liées au réseau qui l'entourent.
+Il faut mettre en place un mécanisme d'interception http, et même ce test relativement simple est bruité par les éléments liés au réseau qui l'entourent.
 
 Si l'on change de protocole ou de canal de communication (event bus, mail ...) il faudra mettre à jour ces tests (qui testent pourtant une autre responsabilité) et trouver un autre framework de mock/interception.
 
@@ -214,7 +214,7 @@ describe("relayMessageToRelevantPeople with channel injection", function () {
 
 ### Exemple Zig
 
-La détection et la prévention de fuites mémoires a motivé le dévelopment de beaucoup d'outil d'analyse, comme [AddressSanitizer](https://clang.llvm.org/docs/AddressSanitizer.html) ou [Valgrind](https://valgrind.org/). Ces outils externes demandent un effort supplémentaire pour les intégrer dans un process de CI par exemple, particulièrement si l'on souhaite vérifier plusieurs composants de manière isolée. Ils requièrenet un apprentissage voire de l'expertise, en plus du language de développement. Bien que n'étant pas aussi exhaustif, l'allocator de la librairie standard Zig `std.testing.allocator` tire parti de l'injection de dépendances pour détecter un large pan de bugs liés à l'allocation mémoire, et est beaucoup moins coûteux à mettre en place au niveau unitaire, détectant les memory leak et les double-free:
+La détection et la prévention de fuites mémoires a motivé le dévelopment de beaucoup d'outil d'analyse, comme [AddressSanitizer](https://clang.llvm.org/docs/AddressSanitizer.html) ou [Valgrind](https://valgrind.org/). Ces outils externes demandent un effort supplémentaire pour les intégrer dans un process de CI par exemple, particulièrement si l'on souhaite vérifier plusieurs composants de manière isolée. Ils requièrent un apprentissage voire de l'expertise, en plus de celle liée au language de développement. Bien que n'étant pas aussi exhaustif, l'allocator de la librairie standard Zig `std.testing.allocator` tire parti de l'injection de dépendances pour détecter un large pan de bugs liés à l'allocation mémoire, et est beaucoup moins complexe à mettre en place au niveau unitaire, détectant les memory leak et les double-free:
 
 ```zig source=zig/example.zig lines=26-46
 test "This would pass" {
@@ -241,6 +241,7 @@ test "Detecting a memory leak" {
 ```
 
 ## 3) Mise en évidence des dépendances d'un composant
+
 Le dernier point est plus simple mais peut être sous-estimé: si chaque ressource ou comportement externe est injecté au lieu d'être instancié au sein des composants, les signatures des fonctions/méthodes/classes révèlent explicitement leur dépendances et besoins, et possiblement des étrangetés dans le design. Par exemple, avoir besoin de paramètres I/O, comme un accès au système de fichier ou une requête à la base de donnée, au sein de fonction censées être purement logiques: 
 
 ```kotlin
@@ -269,7 +270,7 @@ fun onlySplitPolygonInSegments(polygon: Polygon): List<Segment> {
 
 ### Exemple Zig
 
-Il n'est pas toujours nécessaire d'allouer de la mémoire. En étant forcer à passer explicitement un allocator quand on a besoin de mémoire dynamique, on est plus poussé à réfléchir à une solution plus simple ou efficiente, par exemple en se passant de structures de données intermédiaires:
+Il n'est pas toujours nécessaire d'allouer de la mémoire. En étant forcer à passer explicitement un allocator quand on a besoin de mémoire dynamique, on est plus incité à réfléchir à une solution plus simple ou efficiente, par exemple en se passant de structures de données intermédiaires:
 
 
 ```zig source=zig/example.zig lines=48-72
