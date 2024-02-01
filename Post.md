@@ -300,3 +300,5 @@ fn sumOddNumbersInTwoPhases(allocator: std.mem.Allocator, numbers: []const u32) 
     return res;
 }
 ```
+
+Note: adapting algorithms to not require dynamic memory can also make them more complex, there is a tradeoff between efficiency and readability.
