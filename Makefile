@@ -12,6 +12,7 @@ checks:
 	$(MAKE) -C zig fmt-check
 	$(MAKE) -C snippet-verifier tests
 	$(VERIFY_SNIPPETS) Post.md 
+	$(VERIFY_SNIPPETS) Post_fr.md
 
 ci-setup:
 	$(MAKE) -C node ci-setup
