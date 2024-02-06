@@ -270,7 +270,7 @@ fun onlySplitPolygonInSegments(polygon: Polygon): List<Segment> {
 
 ### Exemple Zig
 
-Il n'est pas toujours nécessaire d'allouer de la mémoire. En étant forcer à passer explicitement un allocator quand on a besoin de mémoire dynamique, on est plus incité à réfléchir à une solution plus simple ou efficiente, par exemple en se passant de structures de données intermédiaires:
+Il n'est pas toujours nécessaire d'allouer de la mémoire. En étant forcé à passer explicitement un allocator quand on a besoin de mémoire dynamique, on est plus incité à réfléchir à une solution plus simple ou efficiente, par exemple en se passant de structures de données intermédiaires:
 
 
 ```zig source=zig/example.zig lines=48-72
