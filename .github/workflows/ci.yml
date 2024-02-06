@@ -33,4 +33,5 @@ jobs:
     - name: Run tests
       run: |
         make ci-setup
+        make checks ZIG=${{ github.workspace }}/zig-linux-x86_64-0.11.0/zig
         make example-tests ZIG=${{ github.workspace }}/zig-linux-x86_64-0.11.0/zig
